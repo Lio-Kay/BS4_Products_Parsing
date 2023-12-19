@@ -1,3 +1,4 @@
+import os
 import requests
 import json
 import time
@@ -25,7 +26,7 @@ def main() -> None:
     url = ('https://health-diet.ru/'
            'table_calorie/?utm_source=leftMenu&utm_medium=table_calorie')
     # Создаем случайный user agent
-    ua = UserAgent().firefox
+    ua = UserAgent(min_percentage=50.0).firefox
     headers = {'User-Agent': ua}
 
     data = gather_main_page_data(headers, url)
@@ -34,9 +35,9 @@ def main() -> None:
     for counter, (category, category_url) in enumerate(data.items(), start=1):
         gather_each_page_data(counter, category, category_url, headers)
 
-    emd_main = time.perf_counter()
+    end_main = time.perf_counter()
     logging.debug(f'Закончили собирать данные')
-    print(f'Закончили парсинг за {emd_main-start_main:.2f} сек,'
+    print(f'Закончили парсинг за {end_main-start_main:.2f} сек,'
           f' данные сохранены в папке data, логи в logs.txt')
 
 
@@ -123,8 +124,8 @@ def gather_each_page_data(counter: int, category: str,
         header_carbohydrates = product_headers[4].text
 
         # Записываем в csv
-        with open(file=f'data/{counter}.{category_fixed}.csv', mode='w',
-                  encoding='utf-8') as file:
+        with open(file=f'data/{counter}.{category_fixed}.csv',
+                  mode='w', encoding='utf-8') as file:
             file.write(f'{header_product},{header_energy_value},'
                        f'{header_proteins},{header_fats},{header_carbohydrates}\n')
 
@@ -151,10 +152,13 @@ def gather_each_page_data(counter: int, category: str,
 
         logging.debug(f'Закончили собирать данные из категории №{counter}:'
                       f' {category}')
+        print(f'Закончили собирать данные из категории №{counter}: {category}')
     # Если отсутствует одна из страниц с данными, логируем и пропускаем её
     except AttributeError as exc:
         logging.error(f'Ошибка AttributeError {exc} в категории №{counter}:'
                       f' {category}')
+        print(f'Ошибка AttributeError {exc} в категории №{counter}: '
+              f'{category}')
         pass
 
 
