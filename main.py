@@ -32,6 +32,9 @@ def main() -> None:
     data = gather_main_page_data(headers, url)
     start_main = time.perf_counter()
 
+    directory = 'data'
+    os.makedirs(directory, exist_ok=True)
+
     for counter, (category, category_url) in enumerate(data.items(), start=1):
         gather_each_page_data(counter, category, category_url, headers)
 
